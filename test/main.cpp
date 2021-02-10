@@ -8,7 +8,7 @@
 int main() {
     lft *finder = new lft(MIME_TYPES_PATH);
     for (auto &e : std::filesystem::directory_iterator(".")) {
-        class lft::filetype *ft = finder->filetype(e.path().string());
+        lft::filetype *ft = finder->getFiletype(e.path().string());
         std::string t;
         switch (ft->general) {
         case lft::nonexistent: t = "nonexistent"; break;

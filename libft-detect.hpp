@@ -47,7 +47,7 @@ class lft {
         std::uint8_t mask;
     };
 
-    filetype *filetype(const std::string &path);
+    filetype *getFiletype(const std::string &path);
     lft(const std::string &mime_file_path);
     lft() { generateDB(DEFAULT_MIME_FILE); }
 

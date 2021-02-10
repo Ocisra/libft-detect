@@ -117,12 +117,12 @@ std::uint8_t lft::getMask(std::filesystem::path &p) {
     return mask;
 }
 
-class lft::filetype *lft::filetype(const std::string &path) {
+lft::filetype *lft::getFiletype(const std::string &path) {
     std::filesystem::path p(path);
     if (!std::filesystem::exists(p))
-        return new class filetype(nonexistent);
+        return new filetype(nonexistent);
 
-    class filetype *ft = new class filetype(unknown);
+    filetype *ft = new filetype(unknown);
 
     ft->mask = getMask(p);
 
