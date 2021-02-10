@@ -8,9 +8,9 @@
 int main() {
     lft *finder = new lft(MIME_TYPES_PATH);
     for (auto &e : std::filesystem::directory_iterator(".")) {
-        lft::Filetype ft = finder->filetype(e.path().string());
+        class lft::filetype *ft = finder->filetype(e.path().string());
         std::string t;
-        switch (ft) {
+        switch (ft->general) {
         case lft::nonexistent: t = "nonexistent"; break;
         case lft::unknown: t = "unknown"; break;
         case lft::directory: t = "directory"; break;
@@ -27,8 +27,13 @@ int main() {
         case lft::text: t = "text"; break;
         case lft::executable: t = "executable"; break;
         }
-        std::cout << e.path().string() << ": " << t << std::endl;
+        std::cout << e.path().string() << ": " << t;
+        if (ft->isHidden())
+            std::cout << "  -  hidden";
+        std::cout << std::endl;
+        delete ft;
     }
+    delete finder;
     return 0;
 }
 

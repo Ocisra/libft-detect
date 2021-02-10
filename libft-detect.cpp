@@ -65,7 +65,12 @@ void lft::generateDB(const std::string &path) {
     }
 }
 
-lft::Filetype lft::getNativeFiletype(std::filesystem::path &path) {
+lft::filetype::filetype(lft::generalFT g, std::uint8_t m) {
+    general = g;
+    mask    = m;
+}
+
+lft::generalFT lft::getNativeFiletype(std::filesystem::path &path) {
     switch (std::filesystem::status(path).type()) {
     case std::filesystem::file_type::directory: return directory;
     case std::filesystem::file_type::symlink: return symlink;
@@ -77,7 +82,7 @@ lft::Filetype lft::getNativeFiletype(std::filesystem::path &path) {
     }
 }
 
-lft::Filetype lft::parseMime(std::string &mimetype) {
+lft::generalFT lft::parseMime(std::string &mimetype) {
     if (mimetype.starts_with("text"))
         return text;
     if (mimetype.starts_with("image"))
@@ -93,7 +98,7 @@ lft::Filetype lft::parseMime(std::string &mimetype) {
     return unknown;
 }
 
-lft::Filetype lft::matchMime(std::filesystem::path &p) {
+lft::generalFT lft::matchMime(std::filesystem::path &p) {
     std::unordered_map<std::string, std::string>::iterator entry;
     if ((entry = extensions.find(p.extension().string())) != extensions.end())
         return parseMime(entry->second);
@@ -105,26 +110,36 @@ lft::Filetype lft::matchMime(std::filesystem::path &p) {
     return unknown;
 }
 
-lft::Filetype lft::filetype(const std::string &path) {
-    std::filesystem::path p(path);
-    if (!std::filesystem::exists(p))
-        return nonexistent;
-
-    Filetype ft;
-
-    if ((ft = getNativeFiletype(p)) != unknown)
-        return ft;
-
-    if (access(p.c_str(), X_OK) == 0)
-        return executable;
-
-    if ((ft = matchMime(p)) != unknown)
-        return ft;
-
-
-    return unknown;
+std::uint8_t lft::getMask(std::filesystem::path &p) {
+    std::uint8_t mask = 0x00;
+    if (p.filename().string().starts_with('.'))
+        mask |= hidden;
+    return mask;
 }
 
+class lft::filetype *lft::filetype(const std::string &path) {
+    std::filesystem::path p(path);
+    if (!std::filesystem::exists(p))
+        return new class filetype(nonexistent);
+
+    class filetype *ft = new class filetype(unknown);
+
+    ft->mask = getMask(p);
+
+    if ((ft->general = getNativeFiletype(p)) != unknown)
+        return ft;
+
+    if (access(p.c_str(), X_OK) == 0) {
+        ft->general = lft::executable;
+        return ft;
+    }
+
+    if ((ft->general = matchMime(p)) != unknown)
+        return ft;
+
+
+    return ft;
+}
 
 
 // TODO
